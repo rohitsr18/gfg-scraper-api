@@ -1,0 +1,1 @@
+web: java -jar target/gfg-scraper-api.jar
