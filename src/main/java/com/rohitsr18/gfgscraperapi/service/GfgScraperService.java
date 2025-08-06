@@ -19,44 +19,26 @@ public class GfgScraperService {
         GfgProfile profile = new GfgProfile();
         profile.setUsername(username);
 
-        // --- UPDATED SELECTOR STRATEGY ---
-        // This strategy finds a text label for a stat (e.g., "Coding Score")
-        // and then gets the value from the element immediately following it.
-
         // Find the "Coding Score"
         profile.setCodingScore(
-                parseTextFieldByLabel(doc, "Coding Score")
+                parseTextField(doc, "div.stats_card:nth-of-type(1) .stats_card_right--count")
         );
 
         // Find the "Problems Solved" count
-        String problemsSolvedText = parseTextFieldByLabel(doc, "Problems Solved");
+        String problemsSolvedText = parseTextField(doc, "div.stats_card:nth-of-type(2) .stats_card_right--count");
         profile.setProblemsSolved(parseIntFromString(problemsSolvedText));
-
-        // Scrape the user's institute, which is available.
-       // profile.setInstitute(parseTextField(doc, ".basic_details_data > a"));
 
         // Find the "Contest Rating"
         profile.setContestRating(
-                parseTextFieldByLabel(doc, "Contest Rating")
+                parseTextField(doc, "div.stats_card:nth-of-type(3) .stats_card_right--count")
         );
 
-        // Global Rank is no longer displayed on the main profile page.
-        profile.setGlobalRank("N/A");
+        // Find the Rank
+        String rankText = parseTextField(doc, ".rankNum");
+        profile.setGlobalRank(rankText);
+
 
         return profile;
-    }
-
-    /**
-     * Finds a text label (e.g., "Problems Solved") and returns the text
-     * from the element immediately following it.
-     * @param doc The Jsoup document.
-     * @param label The text of the label to search for.
-     * @return The text of the corresponding value, or "N/A" if not found.
-     */
-    private String parseTextFieldByLabel(Document doc, String label) {
-        // Selector finds a div with the specific label text, then gets its next sibling div.
-        Element element = doc.selectFirst("div.score_card_name:contains(" + label + ") + div.score_card_value");
-        return (element != null) ? element.text() : "N/A";
     }
 
     /**
