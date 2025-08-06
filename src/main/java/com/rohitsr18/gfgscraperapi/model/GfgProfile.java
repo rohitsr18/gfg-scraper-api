@@ -6,6 +6,15 @@ public class GfgProfile {
     private int problemsSolved;
     private String codingScore;
     private String contestRating;
+    private String institute;
+
+    public String getInstitute() {
+        return institute;
+    }
+
+    public void setInstitute(String institute) {
+        this.institute = institute;
+    }
 
     public String getUsername() {
         return username;

@@ -19,24 +19,25 @@ public class GfgScraperService {
         GfgProfile profile = new GfgProfile();
         profile.setUsername(username);
 
-        // Find the "Coding Score"
-        profile.setCodingScore(
-                parseTextField(doc, "div.stats_card:nth-of-type(1) .stats_card_right--count")
-        );
+        // --- UPDATED SELECTOR STRATEGY ---
+        // This new strategy is more robust. It finds the text label for a stat
+        // (e.g., "Coding Score") and then gets the value from the element associated with it.
 
-        // Find the "Problems Solved" count
-        String problemsSolvedText = parseTextField(doc, "div.stats_card:nth-of-type(2) .stats_card_right--count");
+        // Scrape the user's institute
+        profile.setInstitute(parseTextField(doc, ".basic_details_data > a[href*='institute']"));
+
+        // Find the "Coding Score" by its label
+        profile.setCodingScore(findStatByLabel(doc, "Coding Score"));
+
+        // Find the "Problem Solved" count by its label
+        String problemsSolvedText = findStatByLabel(doc, "Problem Solved");
         profile.setProblemsSolved(parseIntFromString(problemsSolvedText));
 
-        // Find the "Contest Rating"
-        profile.setContestRating(
-                parseTextField(doc, "div.stats_card:nth-of-type(3) .stats_card_right--count")
-        );
+        // Find the "Contest Rating" by its label
+        profile.setContestRating(findStatByLabel(doc, "Contest Rating"));
 
-        // Find the Rank
-        String rankText = parseTextField(doc, ".rankNum");
-        profile.setGlobalRank(rankText);
-
+        // Find the Rank by its specific class
+        profile.setGlobalRank(parseTextField(doc, ".rankNum"));
 
         return profile;
     }
@@ -51,14 +52,29 @@ public class GfgScraperService {
     }
 
     /**
+     * Finds a stat card by its text label (e.g., "Problem Solved") and returns the
+     * corresponding value. This is more resilient to page layout changes.
+     * @param doc The Jsoup document.
+     * @param label The text of the label to search for.
+     * @return The text of the corresponding value, or "N/A" if not found.
+     */
+    private String findStatByLabel(Document doc, String label) {
+        // This selector finds a card that has a div containing the label text,
+        // and then finds the count value within that same card.
+        String selector = String.format("div.stats_card:has(div.stats_card_left--name:contains(%s)) div.stats_card_right--count", label);
+        Element element = doc.selectFirst(selector);
+        return (element != null) ? element.text() : "N/A";
+    }
+
+    /**
      * Helper method to parse an integer from a String.
-     * This is useful when the element has already been found.
      * @param text The string containing the number.
      * @return The parsed integer, or 0 if parsing fails.
      */
     private int parseIntFromString(String text) {
         if (text != null && !text.equals("N/A")) {
-            String digitsOnly = text.replaceAll("\\D+", ""); // Remove non-digit characters
+            // Remove any non-digit characters (like commas or dashes) before parsing
+            String digitsOnly = text.replaceAll("[^0-9]", "");
             if (!digitsOnly.isEmpty()) {
                 try {
                     return Integer.parseInt(digitsOnly);
