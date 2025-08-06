@@ -12,33 +12,34 @@ import java.io.IOException;
 public class GfgScraperService {
 
     public GfgProfile scrapeProfile(String username) throws IOException {
-        // 1. UPDATED URL: Use the current public profile URL structure.
+        // 1. Correct URL: The profile page is on the "www" subdomain.
         String url = "https://www.geeksforgeeks.org/user/" + username + "/";
         Document doc = JsoupHelper.fetchDocument(url);
 
         GfgProfile profile = new GfgProfile();
         profile.setUsername(username);
 
-        // 2. UPDATED SELECTORS: Target elements based on their unique links or stable parent classes.
+        // 2. Correct Selectors: The old class names are gone. We now target elements
+        // by finding the link to their specific pages (e.g., the link to "coding-scores").
 
-        // The overall score card is now a single component. Let's select it once.
-        Element scoreCard = doc.selectFirst(".contributor_card_right_upper_div");
+        // Find the main container for all the stats cards.
+        Element scoreCardContainer = doc.selectFirst(".contributor_card_right_upper_div");
 
-        if (scoreCard != null) {
-            // Find the coding score within the score card.
-            Element codingScoreElement = scoreCard.selectFirst("a[href*='coding-scores'] .stats_card_right--count");
+        if (scoreCardContainer != null) {
+            // Inside the container, find the coding score by its unique link.
+            Element codingScoreElement = scoreCardContainer.selectFirst("a[href*='coding-scores'] .stats_card_right--count");
             profile.setCodingScore(codingScoreElement != null ? codingScoreElement.text() : "N/A");
 
-            // Find the problems solved count within the score card.
-            Element problemsSolvedElement = scoreCard.selectFirst("a[href*='problems'] .stats_card_right--count");
+            // Find the problems solved count by its unique link.
+            Element problemsSolvedElement = scoreCardContainer.selectFirst("a[href*='problems'] .stats_card_right--count");
             profile.setProblemsSolved(parseIntFromElement(problemsSolvedElement));
         } else {
-            // If the main score card isn't found, default all to N/A or 0.
+            // If the main stats container isn't found, default all values.
             profile.setCodingScore("N/A");
             profile.setProblemsSolved(0);
         }
 
-        // Global Rank and Contest Rating are not displayed on the main profile page anymore.
+        // These stats are no longer on the main profile page.
         profile.setGlobalRank("N/A");
         profile.setContestRating("N/A");
 
@@ -46,19 +47,18 @@ public class GfgScraperService {
     }
 
     /**
-     * Parses an integer from a Jsoup Element.
-     * Extracts digits from the text and converts to an int.
-     * Returns 0 if element is null or on parsing error.
+     * Helper method to parse an integer from a Jsoup Element.
+     * This avoids code duplication and makes the main method cleaner.
+     * Returns 0 if the element is null or if parsing fails.
      */
     private int parseIntFromElement(Element element) {
         if (element != null) {
-            // Remove any non-digit characters (like commas) before parsing
-            String text = element.text().replaceAll("\\D+", "");
+            String text = element.text().replaceAll("\\D+", ""); // Remove non-digit characters
             if (!text.isEmpty()) {
                 try {
                     return Integer.parseInt(text);
                 } catch (NumberFormatException e) {
-                    // In a real application, you might want to log this error
+                    // In a real application, you would log this error.
                     return 0;
                 }
             }
