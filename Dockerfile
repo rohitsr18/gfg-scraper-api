@@ -1,10 +1,15 @@
-FROM eclipse-temurin:21-jdk
-
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH="$JAVA_HOME/bin:$PATH"
-
+# Stage 1: Build the application with Maven
+FROM eclipse-temurin:21-jdk AS builder
 WORKDIR /app
-COPY . /app
+COPY . .
+RUN chmod +x ./mvnw && ./mvnw clean install
 
-RUN ./mvnw clean install
-CMD ["java", "-jar", "target/your-app.jar"]
+# Stage 2: Create a minimal runtime image
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+
+# Use a wildcard to copy the JAR. This handles any version.
+COPY --from=builder /app/target/*.jar app.jar
+
+# Run the renamed JAR file
+CMD ["java", "-jar", "app.jar"]
