@@ -20,11 +20,10 @@ public class GfgScraperService {
         profile.setUsername(username);
 
         // --- UPDATED SELECTOR STRATEGY ---
-        // The previous selectors were broken by a site redesign.
-        // This new strategy is more robust: it finds the text label for a stat
-        // (e.g., "Overall Coding Score") and then gets the element right next to it.
+        // This strategy finds a text label for a stat (e.g., "Coding Score")
+        // and then gets the value from the element immediately following it.
 
-        // Find the "Overall Coding Score"
+        // Find the "Coding Score"
         profile.setCodingScore(
                 parseTextFieldByLabel(doc, "Coding Score")
         );
@@ -34,13 +33,15 @@ public class GfgScraperService {
         profile.setProblemsSolved(parseIntFromString(problemsSolvedText));
 
         // Scrape the user's institute, which is available.
-        //profile.setInstitute(parseTextField(doc, ".basic_details_data > a"));
+       // profile.setInstitute(parseTextField(doc, ".basic_details_data > a"));
 
-        // Global Rank and Contest Rating are no longer displayed on the main profile page.
-        // Fetching them would require a more complex, multi-page scraping process
-        // which would significantly slow down the API response.
+        // Find the "Contest Rating"
+        profile.setContestRating(
+                parseTextFieldByLabel(doc, "Contest Rating")
+        );
+
+        // Global Rank is no longer displayed on the main profile page.
         profile.setGlobalRank("N/A");
-        profile.setContestRating("N/A");
 
         return profile;
     }
