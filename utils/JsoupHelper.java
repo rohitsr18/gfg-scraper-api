@@ -1,3 +1,5 @@
+package com.rohitsr18.gfgscraperapi.utils;
+
 public class JsoupHelper {
     public static Document fetchDocument(String url) throws IOException {
         return Jsoup.connect(url)

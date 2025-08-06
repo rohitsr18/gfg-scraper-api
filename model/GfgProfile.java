@@ -1,3 +1,5 @@
+package com.rohitsr18.gfgscraperapi.model;
+
 public class GfgProfile {
     private String username;
     private String globalRank;

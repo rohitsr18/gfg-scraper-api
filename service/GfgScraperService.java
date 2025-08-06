@@ -1,3 +1,5 @@
+package com.rohitsr18.gfgscraperapi.service;
+
 @Service
 public class GfgScraperService {
 
