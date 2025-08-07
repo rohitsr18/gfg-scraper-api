@@ -18,7 +18,7 @@ public class GfgScraperService {
 
         GfgProfile profile = new GfgProfile();
         profile.setUsername(username);
-        
+
         // Scrape the user's institute and rank first, as they have unique selectors.
         profile.setInstitute(parseTextField(doc, "div.basic_details_data > a[href*='institute']"));
         profile.setGlobalRank(parseTextField(doc, ".rankNum"));
